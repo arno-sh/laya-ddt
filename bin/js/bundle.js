@@ -74,8 +74,8 @@
             reg("script/GameUI.ts", GameUI);
         }
     }
-    GameConfig.width = 640;
-    GameConfig.height = 1136;
+    GameConfig.width = 750;
+    GameConfig.height = 1200;
     GameConfig.scaleMode = "fixedwidth";
     GameConfig.screenMode = "none";
     GameConfig.alignV = "top";
@@ -88,13 +88,35 @@
     GameConfig.exportSceneToJson = true;
     GameConfig.init();
 
+    class LogicManager {
+        constructor() {
+            this.boxHeight = 0.25;
+        }
+        static getInstance() {
+            if (this._instance == null) {
+                this._instance = new LogicManager();
+            }
+            return this._instance;
+        }
+        Init() {
+            console.log("init");
+            let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, this.boxHeight, 1)));
+            box.transform.translate(new Laya.Vector3(0, 0.5 + this.boxHeight / 2, 0));
+            let material = new Laya.BlinnPhongMaterial();
+            material.albedoColor = new Laya.Vector4(0, 1.0, 0, 1);
+            box.meshRenderer.material = material;
+        }
+    }
+    LogicManager.camera = null;
+    LogicManager.scene = null;
+
     class Main {
         constructor() {
             console.log("===1");
-            if (window["Laya3D"])
-                Laya3D.init(GameConfig.width, GameConfig.height);
-            else
-                Laya.init(GameConfig.width, GameConfig.height, Laya["WebGL"]);
+            let _config = new Config3D();
+            _config.isAntialias = true;
+            _config.isAlpha = false;
+            Laya3D.init(GameConfig.width, GameConfig.height, _config);
             Laya["Physics"] && Laya["Physics"].enable();
             Laya["DebugPanel"] && Laya["DebugPanel"].enable();
             Laya.stage.scaleMode = GameConfig.scaleMode;
@@ -115,7 +137,18 @@
             Laya.AtlasInfoManager.enable("fileconfig.json", Laya.Handler.create(this, this.onConfigLoaded));
         }
         onConfigLoaded() {
-            GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
+            Laya.Scene3D.load("scene/LayaScene_SampleScene/Conventional/SampleScene.ls", Laya.Handler.create(null, function (scene) {
+                LogicManager.scene = scene;
+                Laya.stage.addChild(scene);
+                LogicManager.camera = scene.getChildByName("Main Camera");
+                LogicManager.camera.clearFlag = Laya.BaseCamera.CLEARFLAG_SOLIDCOLOR;
+                var directionLight = scene.addChild(new Laya.DirectionLight());
+                directionLight.color = new Laya.Vector3(1, 0.9, 0.8);
+                var mat = directionLight.transform.worldMatrix;
+                mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
+                directionLight.transform.worldMatrix = mat;
+                LogicManager.getInstance().Init();
+            }));
         }
     }
     new Main();

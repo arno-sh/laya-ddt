@@ -1,10 +1,23 @@
 import GameConfig from "./GameConfig";
+import LogicManager from "./LogicManager";
 class Main {
+
 	constructor() {
 		console.log("===1");
 		//根据IDE设置初始化引擎		
-		if (window["Laya3D"]) Laya3D.init(GameConfig.width, GameConfig.height);
-		else Laya.init(GameConfig.width, GameConfig.height, Laya["WebGL"]);
+		// if (window["Laya3D"]) Laya3D.init(GameConfig.width, GameConfig.height);
+		// else Laya.init(GameConfig.width, GameConfig.height, Laya["WebGL"]);
+
+		//创建一个config3D
+		let _config:Config3D = new Config3D();
+		//设置不开启抗锯齿
+		_config.isAntialias = true;
+		//设置画布不透明
+		_config.isAlpha = false;
+		//使用创建的config3d
+		Laya3D.init(GameConfig.width, GameConfig.height, _config);
+
+
 		Laya["Physics"] && Laya["Physics"].enable();
 		Laya["DebugPanel"] && Laya["DebugPanel"].enable();
 		Laya.stage.scaleMode = GameConfig.scaleMode;
@@ -31,7 +44,27 @@ class Main {
 
 	onConfigLoaded(): void {
 		//加载IDE指定的场景
-		GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
+		//GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
+
+		Laya.Scene3D.load("scene/LayaScene_SampleScene/Conventional/SampleScene.ls",Laya.Handler.create(null,function(scene){
+			LogicManager.scene = scene;
+			//加载完成获取到了Scene3d
+			Laya.stage.addChild(scene);
+			//获取摄像机
+			LogicManager.camera = scene.getChildByName("Main Camera");
+			//清除摄像机的标记
+			LogicManager.camera.clearFlag = Laya.BaseCamera.CLEARFLAG_SOLIDCOLOR;
+			//添加光照
+			//创建方向光
+			var directionLight = scene.addChild(new Laya.DirectionLight()) as Laya.DirectionLight;
+			//方向光的颜色
+			directionLight.color = new Laya.Vector3(1, 0.9, 0.8);
+			//设置平行光的方向
+			var mat = directionLight.transform.worldMatrix;
+			mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
+			directionLight.transform.worldMatrix=mat;
+			LogicManager.getInstance().Init();
+		}));
 	}
 }
 //激活启动类
