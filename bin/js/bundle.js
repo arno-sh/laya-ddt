@@ -91,6 +91,10 @@
     class LogicManager {
         constructor() {
             this.boxHeight = 0.25;
+            this.tower_y = 0.5;
+            this.tower_top_box_x = null;
+            this.tower_max_x = 1.5;
+            this.tower_box_speed = 0.02;
         }
         static getInstance() {
             if (this._instance == null) {
@@ -100,11 +104,39 @@
         }
         Init() {
             console.log("init");
+            this.tower_y += this.boxHeight / 2;
+            this.tower_top_box_x = this.CreateBox(new Laya.Vector3(this.tower_max_x, this.tower_y, 0), new Laya.Vector4(0, 1.0, 0, 1));
+            this.ToMinX(this.tower_top_box_x);
+        }
+        CreateBox(pos, color) {
             let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, this.boxHeight, 1)));
-            box.transform.translate(new Laya.Vector3(0, 0.5 + this.boxHeight / 2, 0));
+            box.transform.translate(pos);
             let material = new Laya.BlinnPhongMaterial();
-            material.albedoColor = new Laya.Vector4(0, 1.0, 0, 1);
+            material.albedoColor = color;
             box.meshRenderer.material = material;
+            return box;
+        }
+        ToMinX(box) {
+            Laya.timer.frameLoop(1, this, this.CBToMinX, [box]);
+        }
+        CBToMinX(box) {
+            box.transform.localPositionX -= this.tower_box_speed;
+            if (box.transform.localPositionX <= -this.tower_max_x) {
+                box.transform.localPositionX = -this.tower_max_x;
+                this.ToMaxX(box);
+                Laya.timer.clear(this, this.CBToMinX);
+            }
+        }
+        ToMaxX(box) {
+            Laya.timer.frameLoop(1, this, this.CBToMaxX, [box]);
+        }
+        CBToMaxX(box) {
+            box.transform.localPositionX += this.tower_box_speed;
+            if (box.transform.localPositionX >= this.tower_max_x) {
+                box.transform.localPositionX = this.tower_max_x;
+                this.ToMinX(box);
+                Laya.timer.clear(this, this.CBToMaxX);
+            }
         }
     }
     LogicManager.camera = null;

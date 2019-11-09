@@ -1,4 +1,0 @@
-{
-  "code": "export default class LogicManager {\r\n    constructor() {\r\n        this.boxHeight = 0.25;\r\n    }\r\n    static getInstance() {\r\n        if (this._instance == null) {\r\n            this._instance = new LogicManager();\r\n        }\r\n        return this._instance;\r\n    }\r\n    Init() {\r\n        console.log(\"init\");\r\n        let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, this.boxHeight, 1)));\r\n        box.transform.translate(new Laya.Vector3(0, 0.5 + this.boxHeight / 2, 0));\r\n        let material = new Laya.BlinnPhongMaterial();\r\n        material.albedoColor = new Laya.Vector4(0, 1.0, 0, 1);\r\n        box.meshRenderer.material = material;\r\n    }\r\n}\r\nLogicManager.camera = null;\r\nLogicManager.scene = null;\r\n",
-  "references": []
-}
