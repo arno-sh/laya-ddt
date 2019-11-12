@@ -1,10 +1,11 @@
-
- import Event = Laya.Event;
+import GameUI from "./script/GameUI"
+import Event = Laya.Event;
 
 export default class LogicManager{
     private static _instance:LogicManager;
     static camera:Laya.Camera = null;
     static scene:Laya.Scene3D = null;
+    static game_ui:GameUI = null;
 
     private move_is_x:boolean = false;
     private boxHeight:number = 0.14; 
@@ -24,6 +25,7 @@ export default class LogicManager{
     private layer:number = 0;
     private camera_target_pos:Laya.Vector3 = null;
     private camera_temp_pos:Laya.Vector3 = null;
+    private score:number = 0;
 
     
     constructor(){
@@ -48,6 +50,8 @@ export default class LogicManager{
         this.top_box_x_len = 1;
         this.top_box_z_len = 1;
         this.layer = 1;
+        this.score = 0;
+        LogicManager.game_ui.lable_score.text = ""+this.score;
         this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
         this.ToMinX(this.top_box);
         this.move_is_x = true;
@@ -83,6 +87,8 @@ export default class LogicManager{
                     this.top_box.transform.position = new Laya.Vector3(pos.x,pos.y,pos.z);
                     pos.y -= this.boxHeight/2;
                     this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.2,this.last_box_z_len+0.2);
+                    this.score += 3;
+                    this.ScoreAnimation(3);
                 }else{
                     let reserved_box = this.CreateBox(new Laya.Vector3(reserved_box_pos_x, this.top_y,this.last_box_postion.z),this.top_box_color,overlap,this.last_box_z_len);
                     let drop_box = this.CreateBox(new Laya.Vector3(drop_box_pos_x,this.top_y,this.last_box_postion.z),this.top_box_color,drop_box_x_len,this.last_box_z_len);
@@ -101,6 +107,8 @@ export default class LogicManager{
                         drop_box.destroy();
                         console.log("drop_box_x destroy!!!!")
                     });
+                    this.score += 1;
+                    this.ScoreAnimation(1);
                 }
 
                 this.top_box_color = new Laya.Vector4(1.0,1.0,0,1);
@@ -149,6 +157,8 @@ export default class LogicManager{
                     this.top_box.transform.position = new Laya.Vector3(pos.x,pos.y,pos.z);
                     pos.y -= this.boxHeight/2;
                     this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.2,this.last_box_z_len+0.2);
+                    this.score += 3;
+                    this.ScoreAnimation(3);
                 }else{
                     let reserved_box = this.CreateBox(new Laya.Vector3(this.last_box_postion.x, this.top_y,reserved_box_pos_z),this.top_box_color,this.last_box_x_len,overlap);
                     let drop_box = this.CreateBox(new Laya.Vector3(this.last_box_postion.x,this.top_y,drop_box_pos_z),this.top_box_color,this.last_box_x_len,drop_box_z_len);
@@ -167,6 +177,8 @@ export default class LogicManager{
                         drop_box.destroy();
                         console.log("drop_box_z destroy!!!!")
                     });
+                    this.score += 1;
+                    this.ScoreAnimation(1);
                 }
 
                 
@@ -286,5 +298,21 @@ export default class LogicManager{
             this.ToMinZ(box);
             Laya.timer.clear(this,this.CBToMaxZ);
         }
+    }
+
+    private ScoreAnimation(score:number):void{
+        let text = new Laya.Text();
+        text.text = "+"+score;
+        text.align = "center";
+        text.fontSize = 50;
+        text.color = "#ffffff";
+        LogicManager.game_ui.addChild(text);
+        text.x = Laya.stage.width/2-30;
+        text.y = LogicManager.game_ui.lable_score.y;
+        Laya.Tween.from(text,{y:LogicManager.game_ui.lable_score.y+200,scaleX:0,scaleY:0},500,Laya.Ease.linearInOut,Laya.Handler.create(this,()=>{
+            text.destroy();
+            LogicManager.game_ui.lable_score.text = ""+this.score;
+        }));
+        // Laya.Tween.from(text,{scaleX:0,scaleY:0},500,Laya.Ease.linearInOut);
     }
 }

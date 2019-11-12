@@ -43,13 +43,13 @@ class Main {
 	}
 
 	onConfigLoaded(): void {
-		//加载IDE指定的场景
-		//GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
-
+		     
 		Laya.Scene3D.load("scene/LayaScene_SampleScene/Conventional/SampleScene.ls",Laya.Handler.create(null,function(scene){
 			LogicManager.scene = scene;
 			//加载完成获取到了Scene3d
+			// console.log(Laya.stage.numChildren);
 			Laya.stage.addChild(scene);
+			// Laya.stage.setChildIndex(scene,0);
 			//获取摄像机
 			LogicManager.camera = scene.getChildByName("Main Camera");
 			//清除摄像机的标记
@@ -62,9 +62,14 @@ class Main {
 			//设置平行光的方向
 			var mat = directionLight.transform.worldMatrix;
 			mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
-			directionLight.transform.worldMatrix=mat;
-			LogicManager.getInstance().Init();
+			directionLight.transform.worldMatrix=mat;			
+
+			console.log("width="+Laya.stage.width);
+			//加载IDE指定的场景
+			GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
 		}));
+
+
 	}
 }
 //激活启动类
