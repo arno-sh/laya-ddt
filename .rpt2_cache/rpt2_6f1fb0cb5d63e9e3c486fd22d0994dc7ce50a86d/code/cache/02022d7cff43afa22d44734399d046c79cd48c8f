@@ -1,7 +1,0 @@
-{
-  "code": "import { ui } from \"./../ui/layaMaxUI\";\r\nimport LogicManager from \"../LogicManager\";\r\nexport default class GameUI extends ui.test.TestSceneUI {\r\n    constructor() {\r\n        super();\r\n        LogicManager.game_ui = this;\r\n        LogicManager.getInstance().Init();\r\n    }\r\n}\r\n",
-  "references": [
-    "G:/work/laya/Project/ddt/laya-ddt/src/ui/layaMaxUI.ts",
-    "G:/work/laya/Project/ddt/laya-ddt/src/LogicManager.ts"
-  ]
-}

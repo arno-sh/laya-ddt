@@ -39,6 +39,7 @@
             this.camera_target_pos = null;
             this.camera_temp_pos = null;
             this.score = 0;
+            this.listBox = new Array();
         }
         static getInstance() {
             if (this._instance == null) {
@@ -46,11 +47,26 @@
             }
             return this._instance;
         }
+        Reset() {
+            if (this.top_box)
+                this.top_box.destroy();
+            Laya.timer.clearAll(this);
+            Laya.stage.off(Event.MOUSE_DOWN, this, this.OnClick);
+            LogicManager.game_ui.btn_continue.off(Event.MOUSE_DOWN, this, this.OnContinueGame);
+            LogicManager.game_ui.btn_reset.off(Event.MOUSE_DOWN, this, this.OnResetGame);
+            this.listBox.forEach(element => {
+                element.destroy();
+            });
+            this.listBox = new Array();
+            LogicManager.camera.transform.position = this.camera_org_pos;
+            this.Init();
+        }
         Init() {
             console.log("init");
             this.camera_org_pos = LogicManager.camera.transform.position;
             this.camera_org_pos = new Laya.Vector3(this.camera_org_pos.x, this.camera_org_pos.y, this.camera_org_pos.z);
             this.camera_target_pos = new Laya.Vector3(this.camera_org_pos.x, this.camera_org_pos.y, this.camera_org_pos.z);
+            this.top_y = 0.5;
             this.top_y += this.boxHeight / 2;
             this.top_box_color = new Laya.Vector4(0, 1.0, 0, 1);
             this.last_box_postion = new Laya.Vector3(0, 0, 0);
@@ -65,9 +81,18 @@
             this.ToMinX(this.top_box);
             this.move_is_x = true;
             Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
+            LogicManager.game_ui.btn_continue.on(Event.MOUSE_DOWN, this, this.OnContinueGame);
+            LogicManager.game_ui.btn_reset.on(Event.MOUSE_DOWN, this, this.OnResetGame);
         }
-        OnClick() {
+        OnResetGame(e) {
+            e.stopPropagation();
+            LogicManager.game_ui.box_continue.visible = false;
+            LogicManager.game_ui.box_start.visible = false;
+            this.Reset();
+        }
+        OnClick(e) {
             console.log("OnClick");
+            e.stopPropagation();
             Laya.timer.clearAll(this);
             Laya.stage.off(Event.MOUSE_DOWN, this, this.OnClick);
             if (this.move_is_x) {
@@ -96,10 +121,12 @@
                         this.CreateEffect(pos, new Laya.Vector4(1.0, 1.0, 1.0, 0), this.last_box_x_len + 0.2, this.last_box_z_len + 0.2);
                         this.score += 3;
                         this.ScoreAnimation(3);
+                        this.listBox.push(this.top_box);
                     }
                     else {
                         let reserved_box = this.CreateBox(new Laya.Vector3(reserved_box_pos_x, this.top_y, this.last_box_postion.z), this.top_box_color, overlap, this.last_box_z_len);
                         let drop_box = this.CreateBox(new Laya.Vector3(drop_box_pos_x, this.top_y, this.last_box_postion.z), this.top_box_color, drop_box_x_len, this.last_box_z_len);
+                        this.listBox.push(reserved_box);
                         this.last_box_postion = reserved_box.transform.position;
                         this.last_box_x_len = overlap;
                         this.top_box_x_len = overlap;
@@ -138,6 +165,7 @@
                 }
                 else {
                     console.log("失败!!!!!!!!!!!!!!");
+                    LogicManager.game_ui.box_continue.visible = true;
                 }
             }
             else {
@@ -166,10 +194,12 @@
                         this.CreateEffect(pos, new Laya.Vector4(1.0, 1.0, 1.0, 0), this.last_box_x_len + 0.2, this.last_box_z_len + 0.2);
                         this.score += 3;
                         this.ScoreAnimation(3);
+                        this.listBox.push(this.top_box);
                     }
                     else {
                         let reserved_box = this.CreateBox(new Laya.Vector3(this.last_box_postion.x, this.top_y, reserved_box_pos_z), this.top_box_color, this.last_box_x_len, overlap);
                         let drop_box = this.CreateBox(new Laya.Vector3(this.last_box_postion.x, this.top_y, drop_box_pos_z), this.top_box_color, this.last_box_x_len, drop_box_z_len);
+                        this.listBox.push(reserved_box);
                         this.last_box_postion = reserved_box.transform.position;
                         this.last_box_z_len = overlap;
                         this.top_box_z_len = overlap;
@@ -208,8 +238,43 @@
                 }
                 else {
                     console.log("失败!!!!!!!!!!!!!!");
+                    LogicManager.game_ui.box_continue.visible = true;
                 }
             }
+        }
+        OnContinueGame(e) {
+            console.log("ContinueGame");
+            e.stopPropagation();
+            this.top_box.destroy();
+            LogicManager.game_ui.box_continue.visible = false;
+            this.listBox.push(this.CreateBox(new Laya.Vector3(0, this.top_y, 0), this.top_box_color, 1, 1));
+            this.top_box_color = new Laya.Vector4(0.0, 1.0, 0, 1);
+            this.top_y += this.boxHeight;
+            for (let i = 1; i <= 5; ++i) {
+                this.listBox.push(this.CreateBox(new Laya.Vector3(0, this.top_y, 0), this.top_box_color, i / 5, i / 5));
+                this.top_y += this.boxHeight;
+                this.top_box_color = new Laya.Vector4(i % 2 == 0 ? 0 : 1, 1.0, 0, 1);
+                ++this.layer;
+                if (this.layer > 4) {
+                    this.camera_target_pos.y += this.boxHeight;
+                    this.camera_temp_pos = LogicManager.camera.transform.position;
+                    Laya.Tween.to(this.camera_temp_pos, {
+                        y: this.camera_target_pos.y,
+                        update: new Laya.Handler(this, function () {
+                            LogicManager.camera.transform.position = this.camera_temp_pos;
+                        })
+                    }, 500, Laya.Ease.linearInOut);
+                }
+            }
+            this.last_box_postion = new Laya.Vector3(0, 0, 0);
+            this.last_box_x_len = 1;
+            this.last_box_z_len = 1;
+            this.top_box_x_len = 1;
+            this.top_box_z_len = 1;
+            this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x, this.top_y, 0), this.top_box_color, this.top_box_x_len, this.top_box_z_len);
+            this.ToMinX(this.top_box);
+            this.move_is_x = true;
+            Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
         }
         CreateEffect(pos, color, x_len, z_len) {
             let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, 0.005, z_len)));
@@ -299,7 +364,7 @@
             LogicManager.game_ui.addChild(text);
             text.x = Laya.stage.width / 2 - 30;
             text.y = LogicManager.game_ui.lable_score.y;
-            Laya.Tween.from(text, { y: LogicManager.game_ui.lable_score.y + 200, scaleX: 0, scaleY: 0 }, 500, Laya.Ease.linearInOut, Laya.Handler.create(this, () => {
+            Laya.Tween.from(text, { x: Laya.stage.width / 2, y: LogicManager.game_ui.lable_score.y + 200, scaleX: 0, scaleY: 0 }, 500, Laya.Ease.linearInOut, Laya.Handler.create(this, () => {
                 text.destroy();
                 LogicManager.game_ui.lable_score.text = "" + this.score;
             }));
@@ -309,10 +374,17 @@
     LogicManager.scene = null;
     LogicManager.game_ui = null;
 
+    var Event$1 = Laya.Event;
     class GameUI extends ui.test.TestSceneUI {
         constructor() {
             super();
             LogicManager.game_ui = this;
+            this.btn_start.on(Event$1.MOUSE_DOWN, this, this.OnStart);
+        }
+        OnStart(e) {
+            e.stopPropagation();
+            this.box_start.visible = false;
+            this.lable_score.visible = true;
             LogicManager.getInstance().Init();
         }
     }
@@ -375,7 +447,6 @@
                 var mat = directionLight.transform.worldMatrix;
                 mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
                 directionLight.transform.worldMatrix = mat;
-                console.log("width=" + Laya.stage.width);
                 GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
             }));
         }

@@ -1,0 +1,7 @@
+{
+  "code": "import { ui } from \"./../ui/layaMaxUI\";\r\nimport LogicManager from \"../LogicManager\";\r\nvar Event = Laya.Event;\r\nexport default class GameUI extends ui.test.TestSceneUI {\r\n    constructor() {\r\n        super();\r\n        LogicManager.game_ui = this;\r\n        this.btn_start.on(Event.MOUSE_DOWN, this, this.OnStart);\r\n    }\r\n    OnStart(e) {\r\n        e.stopPropagation();\r\n        this.box_start.visible = false;\r\n        this.lable_score.visible = true;\r\n        LogicManager.getInstance().Init();\r\n    }\r\n}\r\n",
+  "references": [
+    "G:/work/laya/Project/ddt/laya-ddt/src/ui/layaMaxUI.ts",
+    "G:/work/laya/Project/ddt/laya-ddt/src/LogicManager.ts"
+  ]
+}

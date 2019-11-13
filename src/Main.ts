@@ -64,7 +64,7 @@ class Main {
 			mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
 			directionLight.transform.worldMatrix=mat;			
 
-			console.log("width="+Laya.stage.width);
+			// console.log("width="+Laya.stage.width);
 			//加载IDE指定的场景
 			GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
 		}));
