@@ -25,9 +25,14 @@ export default class LogicManager{
     private layer:number = 0;
     private camera_target_pos:Laya.Vector3 = null;
     private camera_temp_pos:Laya.Vector3 = null;
+    private camera_size:number = 1;
     private score:number = 0;
 
     private listBox:Array<Laya.Sprite3D> = new Array<Laya.MeshSprite3D>();
+    private init:boolean = false;
+    private life:number = 2;
+    private color_idx:number = -1;
+    private color_dir:number = 1;
 
     constructor(){
     }
@@ -51,17 +56,24 @@ export default class LogicManager{
         });
         this.listBox = new Array<Laya.MeshSprite3D>();
         LogicManager.camera.transform.position = this.camera_org_pos;
+        LogicManager.camera.orthographicVerticalSize = this.camera_size;
         this.Init();
     }
 
+
     public Init():void{
         console.log("init");
-        this.camera_org_pos = LogicManager.camera.transform.position;
-        this.camera_org_pos = new Laya.Vector3(this.camera_org_pos.x,this.camera_org_pos.y,this.camera_org_pos.z);
+        if(!this.init){
+            this.camera_org_pos = LogicManager.camera.transform.position;
+            this.camera_size = LogicManager.camera.orthographicVerticalSize;
+            this.camera_org_pos = new Laya.Vector3(this.camera_org_pos.x,this.camera_org_pos.y,this.camera_org_pos.z);
+            this.init = true;
+        }
         this.camera_target_pos = new Laya.Vector3(this.camera_org_pos.x,this.camera_org_pos.y,this.camera_org_pos.z);
+        this.color_idx = -1;
         this.top_y = 0.5;
         this.top_y += this.boxHeight/2;
-        this.top_box_color = new Laya.Vector4(0,1.0,0,1);
+        this.top_box_color = new Laya.Vector4(Math.random(),Math.random(),Math.random(),1);
         this.last_box_postion = new Laya.Vector3(0,0,0);
         this.last_box_x_len = 1;
         this.last_box_z_len = 1;
@@ -69,13 +81,44 @@ export default class LogicManager{
         this.top_box_z_len = 1;
         this.layer = 1;
         this.score = 0;
+        this.life = 0;
+        this.top_box_speed = 0.02;
         LogicManager.game_ui.lable_score.text = ""+this.score;
-        this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
-        this.ToMinX(this.top_box);
+        this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x*-1,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
+        this.ToMaxX(this.top_box);
         this.move_is_x = true;
         Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
         LogicManager.game_ui.btn_continue.on(Event.MOUSE_DOWN,this,this.OnContinueGame);
         LogicManager.game_ui.btn_reset.on(Event.MOUSE_DOWN,this,this.OnResetGame);
+    }
+
+    private ChangeSpeed():void{
+ 
+        let factor = Math.floor(this.layer / 5);
+        this.top_box_speed = 0.02+(0.002*factor);
+        // console.log(this.top_box_speed);
+    }
+
+    
+    public OnGameOver(e: Laya.Event):void{
+        e.stopPropagation();
+
+        if(this.top_box)
+            this.top_box.destroy();
+
+        Laya.timer.clearAll(this);
+        Laya.stage.off(Event.MOUSE_DOWN, this, this.OnGameOver);
+        Laya.stage.off(Event.MOUSE_DOWN, this, this.OnClick);
+        LogicManager.game_ui.btn_continue.off(Event.MOUSE_DOWN,this,this.OnContinueGame);
+        LogicManager.game_ui.btn_reset.off(Event.MOUSE_DOWN,this,this.OnResetGame);
+        this.listBox.forEach(element => {
+            element.destroy();
+        });
+        this.listBox = new Array<Laya.MeshSprite3D>();
+        LogicManager.camera.transform.position = this.camera_org_pos;
+        LogicManager.camera.orthographicVerticalSize = this.camera_size;
+        LogicManager.game_ui.lable_score.visible = false;
+        LogicManager.game_ui.box_start.visible = true;
     }
 
     public OnResetGame(e: Laya.Event):void{
@@ -86,7 +129,7 @@ export default class LogicManager{
     }
 
     public OnClick(e: Laya.Event):void{
-        console.log("OnClick");  
+        // console.log("OnClick");  
         e.stopPropagation();     
         Laya.timer.clearAll(this);
         Laya.stage.off(Event.MOUSE_DOWN, this, this.OnClick);
@@ -141,9 +184,10 @@ export default class LogicManager{
                     this.ScoreAnimation(1);
                 }
 
-                this.top_box_color = new Laya.Vector4(1.0,1.0,0,1);
+                this.top_box_color = this.GetNextColor(this.top_box_color);
                 this.top_y += this.boxHeight;
                 ++this.layer;
+                this.ChangeSpeed();
                 if(this.layer > 4){
                     this.camera_target_pos.y += this.boxHeight;
                     this.camera_temp_pos = LogicManager.camera.transform.position;
@@ -162,7 +206,15 @@ export default class LogicManager{
                 });
             }else{
                 console.log("失败!!!!!!!!!!!!!!")
-                LogicManager.game_ui.box_continue.visible = true;
+                // LogicManager.game_ui.box_continue.visible = true;
+                --this.life;
+                if(this.life < 0){
+                    this.top_box.destroy();
+                    this.top_box = null;
+                }
+                let size = Math.ceil(this.camera_size+this.top_y);
+                let speed = (size - LogicManager.camera.orthographicVerticalSize)/50;  
+                Laya.timer.loop(20,this,this.CameraFarAni,[size,speed]);
             }
         }else{
             let distZ = Math.abs(this.top_box.transform.position.z - this.last_box_postion.z);
@@ -214,9 +266,10 @@ export default class LogicManager{
                 }
 
                 
-                this.top_box_color = new Laya.Vector4(0.0,1.0,0,1);
+                this.top_box_color = this.GetNextColor(this.top_box_color);
                 this.top_y += this.boxHeight;
                 ++this.layer;
+                this.ChangeSpeed();
                 if(this.layer > 4){
                     this.camera_target_pos.y += this.boxHeight;
                     this.camera_temp_pos = LogicManager.camera.transform.position;
@@ -228,18 +281,69 @@ export default class LogicManager{
                     }, 500,Laya.Ease.linearInOut);
                 }
                 this.move_is_x = true;
-                this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x,this.top_y,this.last_box_postion.z),this.top_box_color,this.last_box_x_len,this.last_box_z_len);
-                this.ToMinX(this.top_box);
+                this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x*-1,this.top_y,this.last_box_postion.z),this.top_box_color,this.last_box_x_len,this.last_box_z_len);
+                this.ToMaxX(this.top_box);
                 Laya.timer.once(300,this,()=>{
                     Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
                 });
 
             }else{
                 console.log("失败!!!!!!!!!!!!!!") 
-                LogicManager.game_ui.box_continue.visible = true;
+                // LogicManager.game_ui.box_continue.visible = true;
+                // LogicManager.camera.orthographicVerticalSize = Math.ceil(this.camera_size+this.top_y);
+                --this.life;
+                if(this.life < 0){
+                    this.top_box.destroy();
+                    this.top_box = null;
+                }
+                let size = Math.ceil(this.camera_size+this.top_y);
+                let speed = (size - LogicManager.camera.orthographicVerticalSize)/50;  
+                Laya.timer.loop(20,this,this.CameraFarAni,[size,speed]);
                 
             }
         }
+    }
+
+    public CameraFarAni(size:number,speed:number){
+  
+        LogicManager.camera.orthographicVerticalSize += speed;
+        if(LogicManager.camera.orthographicVerticalSize >= size){
+            LogicManager.camera.orthographicVerticalSize = size;
+            Laya.timer.clear(this,this.CameraFarAni);
+           
+            this.camera_temp_pos = new Laya.Vector3(LogicManager.camera.transform.position.x,LogicManager.camera.transform.position.y,LogicManager.camera.transform.position.z);
+            let _y = this.camera_temp_pos.y - Math.ceil(this.top_y/3);
+            Laya.Tween.to(this.camera_temp_pos,{y:_y,update:new Laya.Handler(this,function(){
+                LogicManager.camera.transform.position = this.camera_temp_pos;
+            })},500,Laya.Ease.linearInOut,new Laya.Handler(this,function(){
+                if(this.life >= 0){
+                    LogicManager.game_ui.box_continue.visible = true;
+                }else{
+                    Laya.stage.on(Event.MOUSE_DOWN,this,this.OnGameOver);
+                }
+            }));
+        }   
+        
+    }
+
+    public CameraNearAni(size:number,speed:number){
+        LogicManager.camera.orthographicVerticalSize -= speed;
+        if(LogicManager.camera.orthographicVerticalSize <= size){
+            LogicManager.camera.orthographicVerticalSize = size;
+
+            this.last_box_postion = new Laya.Vector3(0,0,0);
+            this.last_box_x_len = 1;
+            this.last_box_z_len = 1;
+            this.top_box_x_len = 1;
+            this.top_box_z_len = 1;
+            this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x*-1,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
+            this.ToMaxX(this.top_box);
+            this.move_is_x = true;
+    
+            Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
+    
+            Laya.timer.clear(this,this.CameraNearAni);
+        } 
     }
 
     public OnContinueGame(e:Laya.Event):void{
@@ -249,14 +353,16 @@ export default class LogicManager{
         this.top_box.destroy();
         LogicManager.game_ui.box_continue.visible = false;
 
-        this.listBox.push(this.CreateBox(new Laya.Vector3(0,this.top_y,0),this.top_box_color,1,1));
+        // this.listBox.push(this.CreateCylinder(new Laya.Vector3(0,this.top_y,0),this.top_box_color,0.5));
 
-        this.top_box_color = new Laya.Vector4(0.0,1.0,0,1);
+        this.listBox.push(this.CreateBox(new Laya.Vector3(0,this.top_y,0),this.top_box_color,0.3,0.3));
+
+        this.top_box_color = this.GetNextColor(this.top_box_color);
         this.top_y += this.boxHeight;
         for(let i=1; i<=5; ++i){
             this.listBox.push(this.CreateBox(new Laya.Vector3(0,this.top_y,0),this.top_box_color,i/5,i/5));
             this.top_y += this.boxHeight;
-            this.top_box_color = new Laya.Vector4(i%2==0?0:1,1.0,0,1);
+            this.top_box_color = this.GetNextColor(this.top_box_color);
             ++this.layer;
             if(this.layer > 4){
                 this.camera_target_pos.y += this.boxHeight;
@@ -270,18 +376,10 @@ export default class LogicManager{
             }
         }
 
-        this.last_box_postion = new Laya.Vector3(0,0,0);
-        this.last_box_x_len = 1;
-        this.last_box_z_len = 1;
-        this.top_box_x_len = 1;
-        this.top_box_z_len = 1;
-        this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
-        this.ToMinX(this.top_box);
-        this.move_is_x = true;
-        // Laya.timer.frameOnce(2,this,()=>{
-        //     Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
-        // });
-        Laya.stage.on(Event.MOUSE_DOWN, this, this.OnClick);
+
+        let speed = (LogicManager.camera.orthographicVerticalSize - this.camera_size)/25;  
+        // LogicManager.camera.transform.position = this.camera_org_pos;
+        Laya.timer.loop(20,this,this.CameraNearAni,[this.camera_size,speed]);        
        
     }
 
@@ -318,6 +416,15 @@ export default class LogicManager{
 
     private CreateBox(pos:Laya.Vector3,color:Laya.Vector4,x_len:number,z_len:number):Laya.MeshSprite3D{
         let box: Laya.MeshSprite3D = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, this.boxHeight, z_len))) as Laya.MeshSprite3D;
+        box.transform.translate(pos);
+        let material: Laya.BlinnPhongMaterial = new Laya.BlinnPhongMaterial();
+        material.albedoColor = color;
+        box.meshRenderer.material = material;
+        return box;
+    }
+
+    private CreateCylinder(pos:Laya.Vector3,color:Laya.Vector4,radius:number):Laya.MeshSprite3D{
+        let box: Laya.MeshSprite3D = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createCylinder(radius, this.boxHeight, 30))) as Laya.MeshSprite3D;
         box.transform.translate(pos);
         let material: Laya.BlinnPhongMaterial = new Laya.BlinnPhongMaterial();
         material.albedoColor = color;
@@ -391,5 +498,47 @@ export default class LogicManager{
             LogicManager.game_ui.lable_score.text = ""+this.score;
         }));
         // Laya.Tween.from(text,{scaleX:0,scaleY:0},500,Laya.Ease.linearInOut);
+    }
+
+    private GetNextColor(curColor:Laya.Vector4):Laya.Vector4{
+        let color = new Laya.Vector4(curColor.x,curColor.y,curColor.z,1);
+        let step = 20;
+        let vels = [color.x,color.y,color.z];
+
+        while(this.color_idx < 0){
+            let rand = Math.random();
+            this.color_idx = rand < 0.33 ? 0 : ( rand < 0.66 ? 1 : 2);
+            this.color_dir = 1;
+            if(vels[this.color_idx] > 0.95){
+                this.color_dir = -1;
+            }
+        }
+
+        switch(this.color_idx){
+            case 0:
+            color.x += (1/step*this.color_dir);
+            vels[0] =  color.x;
+            break;
+            case 1:
+            color.y += (1/step*this.color_dir);
+            vels[1] =  color.y;
+            break;
+            case 2:
+            color.z += (1/step*this.color_dir);
+            vels[2] =  color.z;
+            break;
+        }
+
+        if(this.color_dir == 1 && vels[this.color_idx] > 0.95 ){
+            this.color_dir = -1;
+            this.color_idx = -1;
+        }
+
+        if(this.color_dir == -1 && vels[this.color_idx] < 0.05 ){
+            this.color_dir = 1;
+            this.color_idx = -1;
+        }
+
+        return color;
     }
 }
