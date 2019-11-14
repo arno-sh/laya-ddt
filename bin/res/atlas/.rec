@@ -1,14 +1,21 @@
 D .
+D bg
 D comp
 P FB4A83EE btn_360.png
 P 2B9BDD52 btn_360b.png
 P 08E8A6E6 img_fyd_name.png
+R 4C53F1D2 img_fyd_wu.png
+D mp3
 D scene
 D scene/LayaScene_SampleScene
 D scene/LayaScene_SampleScene/Conventional
-R 1E1236E4 SampleScene.ls
+R FC6B7CAA SampleScene.ls
 D scene/LayaScene_SampleScene/Conventional/Assets
 D scene/LayaScene_SampleScene/Conventional/Library
 R 1B9D0F79 unity default resources-Cube.lm
+R D6203CA6 unity default resources-Plane.lm
 D scene/LayaScene_SampleScene/Conventional/Assets/prefab
+R EA7C02FC img_fyd_bg0.jpg
+R D72575A8 img_fyd_bg1.jpg
 R E48CFE90 u3dCube.lmat
+R 0194E745 u3dPlane.lmat

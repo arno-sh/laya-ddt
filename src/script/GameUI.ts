@@ -11,6 +11,7 @@ export default class GameUI extends ui.test.TestSceneUI {
 		super();     
 		LogicManager.game_ui = this;
 		// LogicManager.getInstance().Init(); 
+		console.log(Laya.stage.designHeight);
 		this.btn_start.on(Event.MOUSE_DOWN,this,this.OnStart);
 	}
 	

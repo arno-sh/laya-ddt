@@ -1,0 +1,7 @@
+{
+  "code": "import { ui } from \"./../ui/layaMaxUI\";\r\nexport default class Bg extends ui.test.BgSceneUI {\r\n    constructor() {\r\n        super();\r\n        console.log(\"bg----\");\r\n    }\r\n}\r\n",
+  "references": [
+    "G:/work/laya/Project/ddt/laya-ddt/src/ui/layaMaxUI.ts",
+    "G:/work/laya/Project/ddt/laya-ddt/src/LogicManager.ts"
+  ]
+}

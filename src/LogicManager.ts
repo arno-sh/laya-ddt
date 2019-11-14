@@ -1,11 +1,17 @@
 import GameUI from "./script/GameUI"
 import Event = Laya.Event;
+import GameConfig from "./GameConfig";
+import SoundManager = Laya.SoundManager;
 
 export default class LogicManager{
     private static _instance:LogicManager;
     static camera:Laya.Camera = null;
     static scene:Laya.Scene3D = null;
     static game_ui:GameUI = null;
+    static bottomCube:Laya.MeshSprite3D = null;
+    public top_box_color:Laya.Vector4 = null;
+    public bg_front:Laya.EffectMaterial = null;
+    public bg_black:Laya.BlinnPhongMaterial = null;
 
     private move_is_x:boolean = false;
     private boxHeight:number = 0.14; 
@@ -14,7 +20,6 @@ export default class LogicManager{
     private top_max_z:number = 1.5;
     private top_box_speed = 0.02;
     private top_box:Laya.MeshSprite3D = null;
-    private top_box_color:Laya.Vector4 = null;
     private last_box_postion:Laya.Vector3 = null;
     private last_box_x_len:number = 0;
     private last_box_z_len:number = 0;
@@ -33,6 +38,7 @@ export default class LogicManager{
     private life:number = 2;
     private color_idx:number = -1;
     private color_dir:number = 1;
+    private soundLayer:number = 1;
 
     constructor(){
     }
@@ -57,6 +63,9 @@ export default class LogicManager{
         this.listBox = new Array<Laya.MeshSprite3D>();
         LogicManager.camera.transform.position = this.camera_org_pos;
         LogicManager.camera.orthographicVerticalSize = this.camera_size;
+        this.top_box_color = new Laya.Vector4(Math.random(),Math.random(),Math.random(),1);
+        let mat = LogicManager.bottomCube.meshRenderer.material as Laya.BlinnPhongMaterial;
+        mat.albedoColor = this.top_box_color;
         this.Init();
     }
 
@@ -73,7 +82,8 @@ export default class LogicManager{
         this.color_idx = -1;
         this.top_y = 0.5;
         this.top_y += this.boxHeight/2;
-        this.top_box_color = new Laya.Vector4(Math.random(),Math.random(),Math.random(),1);
+
+        this.top_box_color = this.GetNextColor(this.top_box_color);
         this.last_box_postion = new Laya.Vector3(0,0,0);
         this.last_box_x_len = 1;
         this.last_box_z_len = 1;
@@ -83,6 +93,7 @@ export default class LogicManager{
         this.score = 0;
         this.life = 0;
         this.top_box_speed = 0.02;
+        this.soundLayer = 1;
         LogicManager.game_ui.lable_score.text = ""+this.score;
         this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x*-1,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
         this.ToMaxX(this.top_box);
@@ -119,6 +130,9 @@ export default class LogicManager{
         LogicManager.camera.orthographicVerticalSize = this.camera_size;
         LogicManager.game_ui.lable_score.visible = false;
         LogicManager.game_ui.box_start.visible = true;
+        this.top_box_color = new Laya.Vector4(Math.random(),Math.random(),Math.random(),1);
+        let mat = LogicManager.bottomCube.meshRenderer.material as Laya.BlinnPhongMaterial;
+        mat.albedoColor = this.top_box_color;
     }
 
     public OnResetGame(e: Laya.Event):void{
@@ -157,7 +171,7 @@ export default class LogicManager{
                     let pos = new Laya.Vector3(this.last_box_postion.x,this.top_y,this.last_box_postion.z);
                     this.top_box.transform.position = new Laya.Vector3(pos.x,pos.y,pos.z);
                     pos.y -= this.boxHeight/2;
-                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.2,this.last_box_z_len+0.2);
+                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.1,this.last_box_z_len+0.1);
                     this.score += 3;
                     this.ScoreAnimation(3);
                     this.listBox.push(this.top_box);
@@ -188,6 +202,19 @@ export default class LogicManager{
                 this.top_y += this.boxHeight;
                 ++this.layer;
                 this.ChangeSpeed();
+                this.BGAni();
+                SoundManager.playSound("mp3/s"+Math.abs(this.soundLayer)+".mp3",1);
+                if(this.soundLayer > 0){
+                    this.soundLayer++;
+                    if(this.soundLayer > 8){
+                        this.soundLayer = -7;
+                    }
+                }else{
+                    this.soundLayer++;
+                    if(this.soundLayer === 0){
+                        this.soundLayer = 2;
+                    }
+                }
                 if(this.layer > 4){
                     this.camera_target_pos.y += this.boxHeight;
                     this.camera_temp_pos = LogicManager.camera.transform.position;
@@ -239,7 +266,7 @@ export default class LogicManager{
                     let pos = new Laya.Vector3(this.last_box_postion.x,this.top_y,this.last_box_postion.z);
                     this.top_box.transform.position = new Laya.Vector3(pos.x,pos.y,pos.z);
                     pos.y -= this.boxHeight/2;
-                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.2,this.last_box_z_len+0.2);
+                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.1,this.last_box_z_len+0.1);
                     this.score += 3;
                     this.ScoreAnimation(3);
                     this.listBox.push(this.top_box);
@@ -270,6 +297,19 @@ export default class LogicManager{
                 this.top_y += this.boxHeight;
                 ++this.layer;
                 this.ChangeSpeed();
+                this.BGAni();
+                SoundManager.playSound("mp3/s"+Math.abs(this.soundLayer)+".mp3",1);
+                if(this.soundLayer > 0){
+                    this.soundLayer++;
+                    if(this.soundLayer > 8){
+                        this.soundLayer = -7;
+                    }
+                }else{
+                    this.soundLayer++;
+                    if(this.soundLayer >= 0){
+                        this.soundLayer = 2;
+                    }
+                }
                 if(this.layer > 4){
                     this.camera_target_pos.y += this.boxHeight;
                     this.camera_temp_pos = LogicManager.camera.transform.position;
@@ -301,6 +341,20 @@ export default class LogicManager{
                 Laya.timer.loop(20,this,this.CameraFarAni,[size,speed]);
                 
             }
+        }
+    }
+
+    private BGAni():void{
+        this.bg_front.colorA += 0.01;
+        // console.log(this.bg_front.colorA);
+        if(this.bg_front.colorA >= 0.1){ 
+            this.bg_front.colorA = 0.01;	
+            Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(10)+".jpg", Laya.Handler.create(this, function(tex) {
+				this.bg_front.texture = tex;
+            }));
+            Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(10)+".jpg", Laya.Handler.create(this, function(tex) {
+				this.bg_black.albedoTexture = tex;
+            }));		
         }
     }
 
@@ -386,6 +440,7 @@ export default class LogicManager{
     private CreateEffect(pos:Laya.Vector3,color:Laya.Vector4,x_len:number,z_len:number):Laya.MeshSprite3D{
         let box: Laya.MeshSprite3D = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, 0.005, z_len))) as Laya.MeshSprite3D;
         box.transform.translate(pos);
+        box.layer = 1;
         let material: Laya.EffectMaterial = new Laya.EffectMaterial();
         material.color = color;
         box.meshRenderer.material = material;      
@@ -417,6 +472,7 @@ export default class LogicManager{
     private CreateBox(pos:Laya.Vector3,color:Laya.Vector4,x_len:number,z_len:number):Laya.MeshSprite3D{
         let box: Laya.MeshSprite3D = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, this.boxHeight, z_len))) as Laya.MeshSprite3D;
         box.transform.translate(pos);
+        box.layer = 1;
         let material: Laya.BlinnPhongMaterial = new Laya.BlinnPhongMaterial();
         material.albedoColor = color;
         box.meshRenderer.material = material;
@@ -426,6 +482,7 @@ export default class LogicManager{
     private CreateCylinder(pos:Laya.Vector3,color:Laya.Vector4,radius:number):Laya.MeshSprite3D{
         let box: Laya.MeshSprite3D = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createCylinder(radius, this.boxHeight, 30))) as Laya.MeshSprite3D;
         box.transform.translate(pos);
+        box.layer = 1;
         let material: Laya.BlinnPhongMaterial = new Laya.BlinnPhongMaterial();
         material.albedoColor = color;
         box.meshRenderer.material = material;
@@ -540,5 +597,9 @@ export default class LogicManager{
         }
 
         return color;
+    }
+
+    static randomNum(num:number):number{
+        return Math.floor(Math.random()*num);
     }
 }

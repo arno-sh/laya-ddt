@@ -1,13 +1,13 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":29,
-    "selecteID":28,
+    "selectedBox":1,
+    "selecteID":21,
     "searchKey":"Scene",
     "referenceLines":null,
     "props":{"width":750,"sceneColor":"#000000","runtime":"script/GameUI.ts","positionVariance_0":100,"maxPartices":100,"height":1200},
     "nodeParent":-1,
-    "maxID":30,
+    "maxID":31,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -15,6 +15,20 @@
     "hasChild":true,
     "compId":1,
     "child":[
+        {
+            "x":15,
+            "type":"Image",
+            "searchKey":"Image,img_bottom",
+            "props":{"y":1100,"x":0,"width":750,"var":"img_bottom","skin":"comp/img_fyd_wu.png","height":550,"anchorY":0},
+            "nodeParent":1,
+            "label":"img_bottom",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":30,
+            "child":[
+                ]
+        },
         {
             "x":15,
             "type":"Text",
@@ -36,16 +50,17 @@
             "props":{"var":"box_start","name":"box_start"},
             "nodeParent":1,
             "label":"box_start",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":26,
             "child":[
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btn_start,btn_start",
-                    "props":{"y":950,"x":375,"var":"btn_start","stateNum":"1","skin":"comp/btn_360.png","name":"btn_start","label":"label","anchorY":0.5,"anchorX":0.5},
+                    "props":{"y":950,"x":375,"var":"btn_start","stateNum":"1","skin":"comp/btn_360.png","name":"btn_start","anchorY":0.5,"anchorX":0.5},
                     "nodeParent":26,
                     "label":"btn_start",
                     "isDirectory":false,
@@ -56,6 +71,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":450,"x":375,"skin":"comp/img_fyd_name.png","anchorY":0.5,"anchorX":0.5},

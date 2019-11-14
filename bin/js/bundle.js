@@ -19,8 +19,12 @@
     })(ui || (ui = {}));
 
     var Event = Laya.Event;
+    var SoundManager = Laya.SoundManager;
     class LogicManager {
         constructor() {
+            this.top_box_color = null;
+            this.bg_front = null;
+            this.bg_black = null;
             this.move_is_x = false;
             this.boxHeight = 0.14;
             this.top_y = 0.5;
@@ -28,7 +32,6 @@
             this.top_max_z = 1.5;
             this.top_box_speed = 0.02;
             this.top_box = null;
-            this.top_box_color = null;
             this.last_box_postion = null;
             this.last_box_x_len = 0;
             this.last_box_z_len = 0;
@@ -45,6 +48,7 @@
             this.life = 2;
             this.color_idx = -1;
             this.color_dir = 1;
+            this.soundLayer = 1;
         }
         static getInstance() {
             if (this._instance == null) {
@@ -65,6 +69,9 @@
             this.listBox = new Array();
             LogicManager.camera.transform.position = this.camera_org_pos;
             LogicManager.camera.orthographicVerticalSize = this.camera_size;
+            this.top_box_color = new Laya.Vector4(Math.random(), Math.random(), Math.random(), 1);
+            let mat = LogicManager.bottomCube.meshRenderer.material;
+            mat.albedoColor = this.top_box_color;
             this.Init();
         }
         Init() {
@@ -79,7 +86,7 @@
             this.color_idx = -1;
             this.top_y = 0.5;
             this.top_y += this.boxHeight / 2;
-            this.top_box_color = new Laya.Vector4(Math.random(), Math.random(), Math.random(), 1);
+            this.top_box_color = this.GetNextColor(this.top_box_color);
             this.last_box_postion = new Laya.Vector3(0, 0, 0);
             this.last_box_x_len = 1;
             this.last_box_z_len = 1;
@@ -89,6 +96,7 @@
             this.score = 0;
             this.life = 0;
             this.top_box_speed = 0.02;
+            this.soundLayer = 1;
             LogicManager.game_ui.lable_score.text = "" + this.score;
             this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x * -1, this.top_y, 0), this.top_box_color, this.top_box_x_len, this.top_box_z_len);
             this.ToMaxX(this.top_box);
@@ -118,6 +126,9 @@
             LogicManager.camera.orthographicVerticalSize = this.camera_size;
             LogicManager.game_ui.lable_score.visible = false;
             LogicManager.game_ui.box_start.visible = true;
+            this.top_box_color = new Laya.Vector4(Math.random(), Math.random(), Math.random(), 1);
+            let mat = LogicManager.bottomCube.meshRenderer.material;
+            mat.albedoColor = this.top_box_color;
         }
         OnResetGame(e) {
             e.stopPropagation();
@@ -152,7 +163,7 @@
                         let pos = new Laya.Vector3(this.last_box_postion.x, this.top_y, this.last_box_postion.z);
                         this.top_box.transform.position = new Laya.Vector3(pos.x, pos.y, pos.z);
                         pos.y -= this.boxHeight / 2;
-                        this.CreateEffect(pos, new Laya.Vector4(1.0, 1.0, 1.0, 0), this.last_box_x_len + 0.2, this.last_box_z_len + 0.2);
+                        this.CreateEffect(pos, new Laya.Vector4(1.0, 1.0, 1.0, 0), this.last_box_x_len + 0.1, this.last_box_z_len + 0.1);
                         this.score += 3;
                         this.ScoreAnimation(3);
                         this.listBox.push(this.top_box);
@@ -181,6 +192,20 @@
                     this.top_y += this.boxHeight;
                     ++this.layer;
                     this.ChangeSpeed();
+                    this.BGAni();
+                    SoundManager.playSound("mp3/s" + Math.abs(this.soundLayer) + ".mp3", 1);
+                    if (this.soundLayer > 0) {
+                        this.soundLayer++;
+                        if (this.soundLayer > 8) {
+                            this.soundLayer = -7;
+                        }
+                    }
+                    else {
+                        this.soundLayer++;
+                        if (this.soundLayer === 0) {
+                            this.soundLayer = 2;
+                        }
+                    }
                     if (this.layer > 4) {
                         this.camera_target_pos.y += this.boxHeight;
                         this.camera_temp_pos = LogicManager.camera.transform.position;
@@ -233,7 +258,7 @@
                         let pos = new Laya.Vector3(this.last_box_postion.x, this.top_y, this.last_box_postion.z);
                         this.top_box.transform.position = new Laya.Vector3(pos.x, pos.y, pos.z);
                         pos.y -= this.boxHeight / 2;
-                        this.CreateEffect(pos, new Laya.Vector4(1.0, 1.0, 1.0, 0), this.last_box_x_len + 0.2, this.last_box_z_len + 0.2);
+                        this.CreateEffect(pos, new Laya.Vector4(1.0, 1.0, 1.0, 0), this.last_box_x_len + 0.1, this.last_box_z_len + 0.1);
                         this.score += 3;
                         this.ScoreAnimation(3);
                         this.listBox.push(this.top_box);
@@ -262,6 +287,20 @@
                     this.top_y += this.boxHeight;
                     ++this.layer;
                     this.ChangeSpeed();
+                    this.BGAni();
+                    SoundManager.playSound("mp3/s" + Math.abs(this.soundLayer) + ".mp3", 1);
+                    if (this.soundLayer > 0) {
+                        this.soundLayer++;
+                        if (this.soundLayer > 8) {
+                            this.soundLayer = -7;
+                        }
+                    }
+                    else {
+                        this.soundLayer++;
+                        if (this.soundLayer >= 0) {
+                            this.soundLayer = 2;
+                        }
+                    }
                     if (this.layer > 4) {
                         this.camera_target_pos.y += this.boxHeight;
                         this.camera_temp_pos = LogicManager.camera.transform.position;
@@ -290,6 +329,18 @@
                     let speed = (size - LogicManager.camera.orthographicVerticalSize) / 50;
                     Laya.timer.loop(20, this, this.CameraFarAni, [size, speed]);
                 }
+            }
+        }
+        BGAni() {
+            this.bg_front.colorA += 0.01;
+            if (this.bg_front.colorA >= 0.1) {
+                this.bg_front.colorA = 0.01;
+                Laya.Texture2D.load("bg/img_fyd_bg" + LogicManager.randomNum(10) + ".jpg", Laya.Handler.create(this, function (tex) {
+                    this.bg_front.texture = tex;
+                }));
+                Laya.Texture2D.load("bg/img_fyd_bg" + LogicManager.randomNum(10) + ".jpg", Laya.Handler.create(this, function (tex) {
+                    this.bg_black.albedoTexture = tex;
+                }));
             }
         }
         CameraFarAni(size, speed) {
@@ -357,6 +408,7 @@
         CreateEffect(pos, color, x_len, z_len) {
             let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, 0.005, z_len)));
             box.transform.translate(pos);
+            box.layer = 1;
             let material = new Laya.EffectMaterial();
             material.color = color;
             box.meshRenderer.material = material;
@@ -384,6 +436,7 @@
         CreateBox(pos, color, x_len, z_len) {
             let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, this.boxHeight, z_len)));
             box.transform.translate(pos);
+            box.layer = 1;
             let material = new Laya.BlinnPhongMaterial();
             material.albedoColor = color;
             box.meshRenderer.material = material;
@@ -392,6 +445,7 @@
         CreateCylinder(pos, color, radius) {
             let box = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createCylinder(radius, this.boxHeight, 30)));
             box.transform.translate(pos);
+            box.layer = 1;
             let material = new Laya.BlinnPhongMaterial();
             material.albedoColor = color;
             box.meshRenderer.material = material;
@@ -491,16 +545,21 @@
             }
             return color;
         }
+        static randomNum(num) {
+            return Math.floor(Math.random() * num);
+        }
     }
     LogicManager.camera = null;
     LogicManager.scene = null;
     LogicManager.game_ui = null;
+    LogicManager.bottomCube = null;
 
     var Event$1 = Laya.Event;
     class GameUI extends ui.test.TestSceneUI {
         constructor() {
             super();
             LogicManager.game_ui = this;
+            console.log(Laya.stage.designHeight);
             this.btn_start.on(Event$1.MOUSE_DOWN, this, this.OnStart);
         }
         OnStart(e) {
@@ -556,20 +615,45 @@
             Laya.ResourceVersion.enable("version.json", Laya.Handler.create(this, this.onVersionLoaded), Laya.ResourceVersion.FILENAME_VERSION);
         }
         onVersionLoaded() {
-            Laya.AtlasInfoManager.enable("fileconfig.json", Laya.Handler.create(this, this.onConfigLoaded));
+            Laya.AtlasInfoManager.enable("fileconfig.json", Laya.Handler.create(this, this.onPreLoadFinish));
         }
-        onConfigLoaded() {
-            Laya.Scene3D.load("scene/LayaScene_SampleScene/Conventional/SampleScene.ls", Laya.Handler.create(null, function (scene) {
+        onPreLoadFinish() {
+            Laya.Scene3D.load("scene/LayaScene_SampleScene/Conventional/SampleScene.ls", Laya.Handler.create(this, function (scene) {
                 LogicManager.scene = scene;
                 Laya.stage.addChild(scene);
+                console.log("--" + Laya.stage.numChildren);
                 LogicManager.camera = scene.getChildByName("Main Camera");
-                LogicManager.camera.clearFlag = Laya.BaseCamera.CLEARFLAG_SOLIDCOLOR;
-                var directionLight = scene.addChild(new Laya.DirectionLight());
-                directionLight.color = new Laya.Vector3(1, 0.9, 0.8);
-                var mat = directionLight.transform.worldMatrix;
-                mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
-                directionLight.transform.worldMatrix = mat;
-                GameConfig.startScene && Laya.Scene.open(GameConfig.startScene);
+                LogicManager.camera.clearFlag = Laya.BaseCamera.CLEARFLAG_DEPTHONLY;
+                LogicManager.bottomCube = scene.getChildByName("Cube");
+                LogicManager.getInstance().top_box_color = new Laya.Vector4(Math.random(), Math.random(), Math.random(), 1);
+                let matBox = LogicManager.bottomCube.meshRenderer.material;
+                matBox.albedoColor = LogicManager.getInstance().top_box_color;
+                LogicManager.camera.removeAllLayers();
+                LogicManager.camera.addLayer(1);
+                LogicManager.bottomCube.layer = 1;
+                let BGCamera = scene.getChildByName("BGCamera");
+                let Plane_1 = scene.getChildByName("Plane_1");
+                let Plane_2 = scene.getChildByName("Plane_2");
+                Plane_1.layer = 10;
+                Plane_2.layer = 10;
+                BGCamera.clearFlag = Laya.BaseCamera.CLEARFLAG_DEPTHONLY;
+                BGCamera.removeAllLayers();
+                BGCamera.addLayer(10);
+                let matP1 = new Laya.EffectMaterial();
+                Laya.Texture2D.load("bg/img_fyd_bg" + LogicManager.randomNum(10) + ".jpg", Laya.Handler.create(this, function (tex) {
+                    matP1.texture = tex;
+                }));
+                matP1.colorA = 0.01;
+                Plane_1.meshRenderer.material = matP1;
+                LogicManager.getInstance().bg_front = matP1;
+                let matP2 = new Laya.BlinnPhongMaterial();
+                Laya.Texture2D.load("bg/img_fyd_bg" + LogicManager.randomNum(10) + ".jpg", Laya.Handler.create(this, function (tex) {
+                    matP2.albedoTexture = tex;
+                }));
+                matP2.albedoColorA = 0.2;
+                Plane_2.meshRenderer.material = matP2;
+                LogicManager.getInstance().bg_black = matP2;
+                GameConfig.startScene && Laya.Scene.open(GameConfig.startScene, false);
             }));
         }
     }

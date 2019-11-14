@@ -5,6 +5,7 @@ import Scene=Laya.Scene;
 var REG: Function = Laya.ClassUtils.regClass;
 export module ui.test {
     export class TestSceneUI extends Laya.Scene {
+		public img_bottom:Laya.Image;
 		public lable_score:laya.display.Text;
 		public box_start:Laya.Box;
 		public btn_start:Laya.Button;
