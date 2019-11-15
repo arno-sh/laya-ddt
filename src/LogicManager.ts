@@ -39,6 +39,7 @@ export default class LogicManager{
     private color_idx:number = -1;
     private color_dir:number = 1;
     private soundLayer:number = 1;
+    private combo:number = 0;
 
     constructor(){
     }
@@ -94,6 +95,7 @@ export default class LogicManager{
         this.life = 0;
         this.top_box_speed = 0.02;
         this.soundLayer = 1;
+        this.combo = 0;
         LogicManager.game_ui.lable_score.text = ""+this.score;
         this.top_box = this.CreateBox(new Laya.Vector3(this.top_max_x*-1,this.top_y,0), this.top_box_color,  this.top_box_x_len,  this.top_box_z_len);
         this.ToMaxX(this.top_box);
@@ -106,14 +108,14 @@ export default class LogicManager{
     private ChangeSpeed():void{
  
         let factor = Math.floor(this.layer / 5);
-        this.top_box_speed = 0.02+(0.002*factor);
+        this.top_box_speed = 0.02+(0.004*factor);
         // console.log(this.top_box_speed);
     }
 
     
     public OnGameOver(e: Laya.Event):void{
         e.stopPropagation();
-
+        LogicManager.game_ui.box_tower.visible = false;
         if(this.top_box)
             this.top_box.destroy();
 
@@ -171,10 +173,12 @@ export default class LogicManager{
                     let pos = new Laya.Vector3(this.last_box_postion.x,this.top_y,this.last_box_postion.z);
                     this.top_box.transform.position = new Laya.Vector3(pos.x,pos.y,pos.z);
                     pos.y -= this.boxHeight/2;
-                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.1,this.last_box_z_len+0.1);
-                    this.score += 3;
-                    this.ScoreAnimation(3);
-                    this.listBox.push(this.top_box);
+                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,1.0),this.last_box_x_len+0.15,this.last_box_z_len+0.15);
+                    this.combo ++;
+                    this.score += (1+this.combo);
+                    this.ScoreAnimation(1+this.combo);
+                    this.listBox.push(this.top_box);                  
+                    LogicManager.game_ui.SetCombo(this.combo);
                 }else{
                     let reserved_box = this.CreateBox(new Laya.Vector3(reserved_box_pos_x, this.top_y,this.last_box_postion.z),this.top_box_color,overlap,this.last_box_z_len);
                     let drop_box = this.CreateBox(new Laya.Vector3(drop_box_pos_x,this.top_y,this.last_box_postion.z),this.top_box_color,drop_box_x_len,this.last_box_z_len);
@@ -196,6 +200,7 @@ export default class LogicManager{
                     });
                     this.score += 1;
                     this.ScoreAnimation(1);
+                    this.combo = 0;
                 }
 
                 this.top_box_color = this.GetNextColor(this.top_box_color);
@@ -234,6 +239,7 @@ export default class LogicManager{
             }else{
                 console.log("失败!!!!!!!!!!!!!!")
                 // LogicManager.game_ui.box_continue.visible = true;
+                this.combo = 0;
                 --this.life;
                 if(this.life < 0){
                     this.top_box.destroy();
@@ -266,10 +272,12 @@ export default class LogicManager{
                     let pos = new Laya.Vector3(this.last_box_postion.x,this.top_y,this.last_box_postion.z);
                     this.top_box.transform.position = new Laya.Vector3(pos.x,pos.y,pos.z);
                     pos.y -= this.boxHeight/2;
-                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,0),this.last_box_x_len+0.1,this.last_box_z_len+0.1);
-                    this.score += 3;
-                    this.ScoreAnimation(3);
+                    this.CreateEffect(pos,new Laya.Vector4(1.0,1.0,1.0,1.0),this.last_box_x_len+0.15,this.last_box_z_len+0.15);
+                    this.combo ++;
+                    this.score += (1+this.combo);
+                    this.ScoreAnimation(1+this.combo);
                     this.listBox.push(this.top_box);
+                    LogicManager.game_ui.SetCombo(this.combo);
                 }else{
                     let reserved_box = this.CreateBox(new Laya.Vector3(this.last_box_postion.x, this.top_y,reserved_box_pos_z),this.top_box_color,this.last_box_x_len,overlap);
                     let drop_box = this.CreateBox(new Laya.Vector3(this.last_box_postion.x,this.top_y,drop_box_pos_z),this.top_box_color,this.last_box_x_len,drop_box_z_len);
@@ -290,6 +298,7 @@ export default class LogicManager{
                     });
                     this.score += 1;
                     this.ScoreAnimation(1);
+                    this.combo = 0;
                 }
 
                 
@@ -331,6 +340,7 @@ export default class LogicManager{
                 console.log("失败!!!!!!!!!!!!!!") 
                 // LogicManager.game_ui.box_continue.visible = true;
                 // LogicManager.camera.orthographicVerticalSize = Math.ceil(this.camera_size+this.top_y);
+                this.combo = 0;
                 --this.life;
                 if(this.life < 0){
                     this.top_box.destroy();
@@ -347,12 +357,12 @@ export default class LogicManager{
     private BGAni():void{
         this.bg_front.colorA += 0.01;
         // console.log(this.bg_front.colorA);
-        if(this.bg_front.colorA >= 0.1){ 
+        if(this.bg_front.colorA >= 0.06){ 
             this.bg_front.colorA = 0.01;	
             Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(10)+".jpg", Laya.Handler.create(this, function(tex) {
 				this.bg_front.texture = tex;
             }));
-            Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(10)+".jpg", Laya.Handler.create(this, function(tex) {
+            Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(9)+".jpg", Laya.Handler.create(this, function(tex) {
 				this.bg_black.albedoTexture = tex;
             }));		
         }
@@ -373,7 +383,11 @@ export default class LogicManager{
                 if(this.life >= 0){
                     LogicManager.game_ui.box_continue.visible = true;
                 }else{
-                    Laya.stage.on(Event.MOUSE_DOWN,this,this.OnGameOver);
+                    LogicManager.game_ui.ShowTowerName(this.score);
+                    Laya.timer.once(6000,this,()=>{
+                        Laya.stage.on(Event.MOUSE_DOWN,this,this.OnGameOver);
+                    });
+                   
                 }
             }));
         }   
@@ -441,27 +455,29 @@ export default class LogicManager{
         let box: Laya.MeshSprite3D = LogicManager.scene.addChild(new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(x_len, 0.005, z_len))) as Laya.MeshSprite3D;
         box.transform.translate(pos);
         box.layer = 1;
-        let material: Laya.EffectMaterial = new Laya.EffectMaterial();
-        material.color = color;
+        let material: Laya.UnlitMaterial = new Laya.UnlitMaterial();
+        material.albedoColor = color;
+        material.albedoColorA = 0;
+        material.renderMode = Laya.UnlitMaterial.RENDERMODE_TRANSPARENT;
         box.meshRenderer.material = material;      
         Laya.timer.frameLoop(1,this,this.AlphaIn,[box,material]);
         return box;
     }
 
-    private AlphaIn(box: Laya.MeshSprite3D,material: Laya.EffectMaterial):void{
-        let alpha = material.colorA;
-        alpha += 0.1;
-        material.colorA = alpha;
-        if(alpha >= 0.5){
+    private AlphaIn(box: Laya.MeshSprite3D,material: Laya.UnlitMaterial):void{
+        let alpha = material.albedoColorA;
+        alpha += 0.05;
+        material.albedoColorA = alpha;
+        if(alpha >= 0.4){
             Laya.timer.clear(this,this.AlphaIn);
             Laya.timer.frameLoop(1,this,this.AlphaOut,[box,material]);
         }
     }
 
-    private AlphaOut(box: Laya.MeshSprite3D,material: Laya.EffectMaterial):void{
-        let alpha = material.colorA;
-        alpha -= 0.1;
-        material.colorA = alpha;
+    private AlphaOut(box: Laya.MeshSprite3D,material: Laya.UnlitMaterial):void{
+        let alpha = material.albedoColorA;
+        alpha -= 0.05;
+        material.albedoColorA = alpha;
         if(alpha <= 0){
             Laya.timer.clear(this,this.AlphaOut);
             box.destroy();

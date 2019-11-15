@@ -80,10 +80,10 @@ class Main {
 			LogicManager.getInstance().bg_front = matP1;
 
 			let matP2:Laya.BlinnPhongMaterial = new Laya.BlinnPhongMaterial();
-			Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(10)+".jpg", Laya.Handler.create(this, function(tex) {
+			Laya.Texture2D.load("bg/img_fyd_bg"+LogicManager.randomNum(9)+".jpg", Laya.Handler.create(this, function(tex) {
 				matP2.albedoTexture = tex;
 			}));		
-			matP2.albedoColorA = 0.2;			
+			matP2.albedoColorA = 0.1;			
 			Plane_2.meshRenderer.material = matP2;
 			LogicManager.getInstance().bg_black = matP2;
 			  
@@ -91,12 +91,13 @@ class Main {
 			//创建方向光
 			// var directionLight = scene.addChild(new Laya.DirectionLight()) as Laya.DirectionLight;
 			// //方向光的颜色
-			// directionLight.color = new Laya.Vector3(1, 0.9, 0.8);
+			// directionLight.color = new Laya.Vector3(0.3, 0.3, 0.3);
+			// directionLight.intensity = 0.3;
 			// //设置平行光的方向
 			// var mat = directionLight.transform.worldMatrix;
-			// mat.setForward(new Laya.Vector3(0, -1.0, -1.0));
+			// mat.setForward(new Laya.Vector3(1.0, -1.0, -1.0));
 			// directionLight.transform.worldMatrix=mat;	
-			// directionLight.removeAllLayers();
+	
 			
 			//加载IDE指定的场景
 			GameConfig.startScene && Laya.Scene.open(GameConfig.startScene,false);	

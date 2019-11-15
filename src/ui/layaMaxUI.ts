@@ -12,6 +12,21 @@ export module ui.test {
 		public box_continue:Laya.Box;
 		public btn_reset:Laya.Button;
 		public btn_continue:Laya.Button;
+		public box_combo:Laya.Box;
+		public img_digtal_0:Laya.Image;
+		public img_digtal_1:Laya.Image;
+		public img_digtal_2:Laya.Image;
+		public box_tower:Laya.Box;
+		public lable_0:laya.display.Text;
+		public lable_1:laya.display.Text;
+		public lable_2:laya.display.Text;
+		public lable_3:laya.display.Text;
+		public lable_4:laya.display.Text;
+		public lable_5:laya.display.Text;
+		public lable_6:laya.display.Text;
+		public lable_7:laya.display.Text;
+		public lable_8:laya.display.Text;
+		public lable_9:laya.display.Text;
         constructor(){ super()}
         createChildren():void {
             super.createChildren();
