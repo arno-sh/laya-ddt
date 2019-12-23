@@ -8,6 +8,7 @@ import Event = Laya.Event;
  */
 export default class GameUI extends ui.test.TestSceneUI {
 	private allLables:Array<Laya.Text> = new Array<Laya.Text>();
+	private bestScore:number = 0;
     constructor() {
 		super();     
 		LogicManager.game_ui = this;
@@ -29,6 +30,12 @@ export default class GameUI extends ui.test.TestSceneUI {
 			element.text = "";
 		})
 		this.btn_start.on(Event.MOUSE_DOWN,this,this.OnStart);
+		this.OnRestart();
+	}
+
+	public OnRestart(){
+		this.bestScore = GameUI.getLocalStorage("bestScore",0);
+		this.lblBestScore.text = "" + this.bestScore;
 	}
 	
 	public OnStart(e: Laya.Event):void{
@@ -112,10 +119,36 @@ export default class GameUI extends ui.test.TestSceneUI {
 		}else{
 			tower = "上海中心";
 		}
+		if(score > this.bestScore){
+			this.bestScore = score;
+			GameUI.setLocalStorage("bestScore",score);
+		}
 		for(let i=0; i<tower.length; ++i){
 			this.allLables[i].text = tower[i];
 			Laya.Tween.to(this.allLables[i],{scaleX:1,scaleY:1},500,Laya.Ease.sineOut,null,i*300);
 		}
 	}
+
+	public static getLocalStorage(key, def) {
+        var num = def
+        var temp1 = Laya.LocalStorage.getItem(key)
+        if (temp1) {
+            if (isNaN(temp1)) {
+                num = def
+                Laya.LocalStorage.setItem(key, num)
+            } else {
+                num = parseInt(temp1)
+            }
+
+        } else {
+            num = def
+            Laya.LocalStorage.setItem(key, num)
+        }
+        return num
+	}
+	
+	public static setLocalStorage(key, num) {
+        Laya.LocalStorage.setItem(key, num)
+    }
 	
 }

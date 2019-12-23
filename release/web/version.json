@@ -12,7 +12,7 @@
   "comp/img_fyd_wu.png": "comp/img_fyd_wu-4d44460765.png",
   "fileconfig.json": "fileconfig-342e2831ad.json",
   "index.js": "index-b8446a9660.js",
-  "js/bundle.js": "js/bundle-6844674c24.js",
+  "js/bundle.js": "js/bundle-38c1b387da.js",
   "libs/laya.core.js": "libs/laya-0f381611e6.core.js",
   "libs/laya.d3.js": "libs/laya-fafca88b8b.d3.js",
   "libs/laya.physics3D.js": "libs/laya-54fbae0c08.physics3D.js",
@@ -38,6 +38,6 @@
   "scene/LayaScene_SampleScene/Conventional/Library/unity default resources-Plane.lm": "scene/LayaScene_SampleScene/Conventional/Library/unity default resources-Plane-e9d7412155.lm",
   "scene/LayaScene_SampleScene/Conventional/SampleScene.ls": "scene/LayaScene_SampleScene/Conventional/SampleScene-2922f42723.ls",
   "test/BgScene.json": "test/BgScene-b99bc14828.json",
-  "test/TestScene.json": "test/TestScene-d17152c118.json",
+  "test/TestScene.json": "test/TestScene-335d098226.json",
   "unpack.json": "unpack-de497bf9e1.json"
 }

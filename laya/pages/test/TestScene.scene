@@ -1,13 +1,13 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":38,
-    "selecteID":48,
+    "selectedBox":26,
+    "selecteID":50,
     "searchKey":"Scene",
     "referenceLines":null,
     "props":{"width":750,"sceneColor":"#000000","runtime":"script/GameUI.ts","positionVariance_0":100,"maxPartices":100,"height":1200},
     "nodeParent":-1,
-    "maxID":49,
+    "maxID":51,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -51,13 +51,14 @@
             "props":{"var":"box_start","name":"box_start"},
             "nodeParent":1,
             "label":"box_start",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":26,
             "child":[
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btn_start,btn_start",
                     "props":{"y":950,"x":375,"var":"btn_start","stateNum":"1","skin":"comp/btn_360.png","name":"btn_start","anchorY":0.5,"anchorX":0.5},
@@ -71,6 +72,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":450,"x":375,"skin":"comp/img_fyd_name.png","anchorY":0.5,"anchorX":0.5},
@@ -80,6 +82,34 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":27,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Text",
+                    "searchKey":"Text",
+                    "props":{"y":1098,"x":286,"width":130,"text":"最好分数：","height":50,"fontSize":30,"color":"#ffffff"},
+                    "nodeParent":26,
+                    "label":"Text",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":49,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Text",
+                    "searchKey":"Text,lableScore,lblBestScore",
+                    "props":{"y":1098,"x":426,"width":100,"var":"lblBestScore","text":"0","name":"lableScore","height":50,"fontSize":30,"color":"#ffffff"},
+                    "nodeParent":26,
+                    "label":"lableScore",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":50,
                     "child":[
                         ]
                 }]

@@ -129,6 +129,7 @@
 	        LogicManager.camera.orthographicVerticalSize = this.camera_size;
 	        LogicManager.game_ui.lable_score.visible = false;
 	        LogicManager.game_ui.box_start.visible = true;
+	        LogicManager.game_ui.OnRestart();
 	        this.top_box_color = new Laya.Vector4(Math.random(), Math.random(), Math.random(), 1);
 	        let mat = LogicManager.bottomCube.meshRenderer.material;
 	        mat.albedoColor = this.top_box_color;
@@ -575,6 +576,7 @@
 	    constructor() {
 	        super();
 	        this.allLables = new Array();
+	        this.bestScore = 0;
 	        LogicManager.game_ui = this;
 	        this.box_combo.visible = false;
 	        this.box_tower.visible = false;
@@ -592,6 +594,11 @@
 	            element.text = "";
 	        });
 	        this.btn_start.on(Event$1.MOUSE_DOWN, this, this.OnStart);
+	        this.OnRestart();
+	    }
+	    OnRestart() {
+	        this.bestScore = GameUI.getLocalStorage("bestScore", 0);
+	        this.lblBestScore.text = "" + this.bestScore;
 	    }
 	    OnStart(e) {
 	        e.stopPropagation();
@@ -684,10 +691,35 @@
 	        else {
 	            tower = "上海中心";
 	        }
+	        if (score > this.bestScore) {
+	            this.bestScore = score;
+	            GameUI.setLocalStorage("bestScore", score);
+	        }
 	        for (let i = 0; i < tower.length; ++i) {
 	            this.allLables[i].text = tower[i];
 	            Laya.Tween.to(this.allLables[i], { scaleX: 1, scaleY: 1 }, 500, Laya.Ease.sineOut, null, i * 300);
 	        }
+	    }
+	    static getLocalStorage(key, def) {
+	        var num = def;
+	        var temp1 = Laya.LocalStorage.getItem(key);
+	        if (temp1) {
+	            if (isNaN(temp1)) {
+	                num = def;
+	                Laya.LocalStorage.setItem(key, num);
+	            }
+	            else {
+	                num = parseInt(temp1);
+	            }
+	        }
+	        else {
+	            num = def;
+	            Laya.LocalStorage.setItem(key, num);
+	        }
+	        return num;
+	    }
+	    static setLocalStorage(key, num) {
+	        Laya.LocalStorage.setItem(key, num);
 	    }
 	}
 

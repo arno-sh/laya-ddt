@@ -12,4 +12,4 @@ loadLib("libs/laya-0f381611e6.core.js")
 loadLib("libs/laya-f0f6c55b8e.ui.js")
 loadLib("libs/laya-54fbae0c08.physics3D.js")
 loadLib("libs/laya-fafca88b8b.d3.js")//-----libs-end-------
-loadLib("js/bundle-6844674c24.js");
+loadLib("js/bundle-38c1b387da.js");

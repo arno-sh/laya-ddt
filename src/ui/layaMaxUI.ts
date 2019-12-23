@@ -9,6 +9,7 @@ export module ui.test {
 		public lable_score:laya.display.Text;
 		public box_start:Laya.Box;
 		public btn_start:Laya.Button;
+		public lblBestScore:laya.display.Text;
 		public box_continue:Laya.Box;
 		public btn_reset:Laya.Button;
 		public btn_continue:Laya.Button;

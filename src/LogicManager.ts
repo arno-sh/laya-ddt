@@ -132,6 +132,7 @@ export default class LogicManager{
         LogicManager.camera.orthographicVerticalSize = this.camera_size;
         LogicManager.game_ui.lable_score.visible = false;
         LogicManager.game_ui.box_start.visible = true;
+        LogicManager.game_ui.OnRestart();
         this.top_box_color = new Laya.Vector4(Math.random(),Math.random(),Math.random(),1);
         let mat = LogicManager.bottomCube.meshRenderer.material as Laya.BlinnPhongMaterial;
         mat.albedoColor = this.top_box_color;
