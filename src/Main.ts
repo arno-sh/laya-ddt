@@ -3,7 +3,7 @@ import LogicManager from "./LogicManager";
 class Main {
 
 	constructor() {
-		console.log("===1");
+		//console.log("===2");
 		//根据IDE设置初始化引擎		
 		// if (window["Laya3D"]) Laya3D.init(GameConfig.width, GameConfig.height);
 		// else Laya.init(GameConfig.width, GameConfig.height, Laya["WebGL"]);
@@ -43,7 +43,7 @@ class Main {
 	}
 
 	onPreLoadFinish():void{
-		// console.log("onPreLoadFinish="+suc);
+		// console.log("onPreLoadFinish=");
 		Laya.Scene3D.load("scene/LayaScene_SampleScene/Conventional/SampleScene.ls",Laya.Handler.create(this,function(scene){
 			LogicManager.scene = scene;
 			Laya.stage.addChild(scene);
@@ -100,10 +100,13 @@ class Main {
 	
 			
 			//加载IDE指定的场景
+			// console.log('============++++++++++++++')
 			GameConfig.startScene && Laya.Scene.open(GameConfig.startScene,false);	
 		}));
 
 	}
+
+	
 }
 //激活启动类
 new Main();

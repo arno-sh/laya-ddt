@@ -3,6 +3,8 @@ D bg
 D comp
 P FB4A83EE btn_360.png
 P 2B9BDD52 btn_360b.png
+P 0BB3668A btn_more.png
+P E2E0B98A btn_rank.png
 P F7893F65 img_ddt_combo.png
 P 99202897 img_ddt_n0.png
 P 6F810548 img_ddt_n1.png
@@ -17,6 +19,9 @@ P 1DCF30D6 img_ddt_n9.png
 P 4650C0CB img_ddt_x.png
 P 08E8A6E6 img_fyd_name.png
 R 4C53F1D2 img_fyd_wu.png
+P DA5BF9B3 img_moregame.png
+R 620E055F img_rank.png
+P 3E443C75 img_share.png
 D mp3
 D scene
 D scene/LayaScene_SampleScene

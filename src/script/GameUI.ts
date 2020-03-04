@@ -8,7 +8,10 @@ import Event = Laya.Event;
  */
 export default class GameUI extends ui.test.TestSceneUI {
 	private allLables:Array<Laya.Text> = new Array<Laya.Text>();
-	private bestScore:number = 0;
+	private bestScore:number = 0;		
+	private gID:string = "";
+	private lblRanks:Array<Laya.Text> = new Array<Laya.Text>();
+
     constructor() {
 		super();     
 		LogicManager.game_ui = this;
@@ -29,13 +32,36 @@ export default class GameUI extends ui.test.TestSceneUI {
 		this.allLables.forEach(element=>{
 			element.text = "";
 		})
+		this.lblRanks.push(this.lblRank_1);
+		this.lblRanks.push(this.lblRank_2);
+		this.lblRanks.push(this.lblRank_3);
+		this.lblRanks.push(this.lblRank_4);
+		this.lblRanks.push(this.lblRank_5);
+		this.lblRanks.push(this.lblRank_6);
+		this.lblRanks.push(this.lblRank_7);
+		this.lblRanks.push(this.lblRank_8);
+		this.lblRanks.push(this.lblRank_9);
+		this.lblRanks.push(this.lblRank_10);
+
 		this.btn_start.on(Event.MOUSE_DOWN,this,this.OnStart);
+		this.btn_more.on(Event.MOUSE_DOWN,this,this.onMore);
+		this.btn_rank.on(Event.MOUSE_DOWN,this,this.onRank);
+		this.btn_rank_return.on(Event.MOUSE_DOWN,this,this.onCloseRank);
+
+		this.gID = this.cans();
 		this.OnRestart();
 	}
 
 	public OnRestart(){
 		this.bestScore = GameUI.getLocalStorage("bestScore",0);
 		this.lblBestScore.text = "" + this.bestScore;
+		this.textGID.text = "ID-"+this.gID;
+		if(this.bestScore > 0){
+			this.netPushScore(this.bestScore);
+		}
+		this.boxRank.visible = false;
+		this.btn_rank_return.visible = false;
+		
 	}
 	
 	public OnStart(e: Laya.Event):void{
@@ -45,6 +71,40 @@ export default class GameUI extends ui.test.TestSceneUI {
 		this.box_tower.visible = false;
 		LogicManager.getInstance().Init();		
 				
+	}
+
+	public onMore(e:Laya.Event):void{
+		e.stopPropagation();		
+		window.location.href = 'http://www.doudoubird.com/ddn/newGame.html?from=groupmessage'; 		
+	}
+
+	public onRank(e:Laya.Event):void{
+		e.stopPropagation();
+		this.boxRank.visible = true;
+		this.btn_rank_return.visible = true;
+		this.httpGet("http://www.ask4kid.com:9001/get_rank?canvas_id="+this.gID+"&game=ddt",(res)=>{
+            // console.log(res);
+            if( res && res.status === 0){
+                if(res.info){
+                    for (let index = 0; index < res.info.length; index++) {
+                        const element = res.info[index];                       
+                        if(element.canvas_id === this.gID){
+                            this.lblRanks[index].text = ""+(index+1)+"-"+element.canvas_id+":(我)     "+element.score;
+                            this.lblRanks[index].color = "#ff0000";
+                        }else{
+                            this.lblRanks[index].text = ""+(index+1)+"-"+element.canvas_id+":         "+element.score;
+                            this.lblRanks[index].color = "#1aa000";
+                        }
+                    }
+                }
+            }
+        });
+	}
+
+	public onCloseRank(e:Laya.Event):void{
+		e.stopPropagation();
+		this.boxRank.visible = false;
+		this.btn_rank_return.visible = false;
 	}
 
 	public SetCombo(num:number):void{
@@ -121,7 +181,8 @@ export default class GameUI extends ui.test.TestSceneUI {
 		}
 		if(score > this.bestScore){
 			this.bestScore = score;
-			GameUI.setLocalStorage("bestScore",score);
+			GameUI.setLocalStorage("bestScore",score);			
+			this.netPushScore(this.bestScore);			
 		}
 		for(let i=0; i<tower.length; ++i){
 			this.allLables[i].text = tower[i];
@@ -131,13 +192,14 @@ export default class GameUI extends ui.test.TestSceneUI {
 
 	public static getLocalStorage(key, def) {
         var num = def
-        var temp1 = Laya.LocalStorage.getItem(key)
+		var temp1 = Laya.LocalStorage.getItem(key)
         if (temp1) {
-            if (isNaN(temp1)) {
+			var temp2 = Number(temp1);
+            if (isNaN(temp2)) {
                 num = def
                 Laya.LocalStorage.setItem(key, num)
             } else {
-                num = parseInt(temp1)
+                num = parseInt(temp1);
             }
 
         } else {
@@ -149,6 +211,78 @@ export default class GameUI extends ui.test.TestSceneUI {
 	
 	public static setLocalStorage(key, num) {
         Laya.LocalStorage.setItem(key, num)
+	}
+
+
+    bin2hex(str) {
+        var result = "";
+        for (let i = 0; i < str.length; i++ ) {
+            result += this.int16_to_hex(str.charCodeAt(i));
+        }
+        return result;
+    }
+            
+    int16_to_hex(i) {
+        var result = i.toString(16);
+        var j = 0;
+        while (j+result.length < 4){
+            result = "0" + result;
+            j++;
+        }
+        return result;
+    }
+
+    cans(){
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var txt = 'www.flashflora.com';
+            ctx.textBaseline = "top";
+            ctx.font = "14px 'Arial'";
+        //     ctx.textBaseline = "tencent";
+            ctx.fillStyle = "#f60";
+            ctx.fillRect(125,1,62,20);
+            ctx.fillStyle = "#069";
+            ctx.fillText(txt, 2, 15);
+            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+            ctx.fillText(txt, 4, 17);
+            
+            var b64 = canvas.toDataURL().replace("data:image/png;base64,","");
+            var bin = atob(b64);
+            var crc = this.bin2hex(bin.slice(-16,-12));
+            return crc;
+	}
+	
+	httpGet(url, callback) {
+        // cc.myGame.gameUi.onShowLockScreen();
+        let xhr = new Laya.HttpRequest();//cc.loader.getXMLHttpRequest();
+		xhr.once(Event.COMPLETE, this, ()=>{
+			callback(xhr.data);
+		});
+
+
+        // };
+        xhr.http.withCredentials = false;
+        // xhr.open('GET', url, true);
+
+        // if (cc.sys.isNative) {
+        // xhr.http.setRequestHeader('Access-Control-Allow-Origin', '*');
+        // xhr.http.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST');
+        // xhr.http.setRequestHeader('Access-Control-Allow-Headers', 'x-requested-with,content-type,authorization');
+        // xhr.http.setRequestHeader("Content-Type", "application/json");
+        // xhr.setRequestHeader('Authorization', 'Bearer ' + cc.myGame.gameManager.getToken());
+        // xhr.setRequestHeader('Authorization', 'Bearer ' + "");
+        // }
+
+        // note: In Internet Explorer, the timeout property may be set only after calling the open()
+        // method and before calling the send() method.
+        xhr.http.timeout = 8000;// 8 seconds for timeout
+
+        xhr.send(url,"","get","json",["Content-Type","application/json",'Access-Control-Allow-Origin', '*','Access-Control-Allow-Methods', 'GET, POST','Access-Control-Allow-Headers', 'x-requested-with,content-type,authorization']);
     }
 	
+	netPushScore(score){
+        this.httpGet("http://www.ask4kid.com:9001/update_rank_asc?canvas_id="+this.gID+"&game=ddt&score="+score,(res)=>{
+            // console.log(res);
+        });
+    }
 }

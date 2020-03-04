@@ -1,4 +1,4 @@
-// v1.2.0
+// v1.3.0
 // publish 2.x 也是用这个文件，需要做兼容
 let isPublish2 = process.argv[2].includes("publish_bdgame.js") && process.argv[3].includes("--evn=publish2");
 // 获取Node插件和工作路径
@@ -22,9 +22,12 @@ const childProcess = require("child_process");
 const del = require(ideModuleDir + "del");
 const revCollector = require(ideModuleDir + 'gulp-rev-collector');
 let commandSuffix = ".cmd";
-let prevTasks = ["packfile"];
+
+let copyLibsTask = ["copyLibsJsFile"];
+let packfiletask = ["packfile"];
 if (isPublish2) {
-	prevTasks = "";
+	copyLibsTask = "";
+	packfiletask = ["copyPlatformFile_BD"];
 }
 
 let 
@@ -34,7 +37,7 @@ let
 let isGlobalCli = true;
 let versionCon; // 版本管理version.json
 // 应该在publish中的，但是为了方便发布2.0及IDE 1.x，放在这里修改
-gulp.task("preCreate_BD", prevTasks, function() {
+gulp.task("preCreate_BD", copyLibsTask, function() {
 	if (isPublish2) {
 		let pubsetPath = path.join(workSpaceDir, ".laya", "pubset.json");
 		let content = fs.readFileSync(pubsetPath, "utf8");
@@ -74,11 +77,19 @@ gulp.task("copyPlatformFile_BD", ["preCreate_BD"], function() {
 	if (isHadBdFiles) {
 		return;
 	}
+	let isHasPublish = 
+		fs.existsSync(path.join(releaseDir, "game.js")) &&
+		fs.existsSync(path.join(releaseDir, "game.json")) &&
+		fs.existsSync(path.join(releaseDir, "project.swan.json")) &&
+		fs.existsSync(path.join(releaseDir, "swan-game-adapter.js"));
+	if (isHasPublish) {
+		return;
+	}
 	let stream = gulp.src(adapterPath + "/*.*");
 	return stream.pipe(gulp.dest(releaseDir));
 });
 
-gulp.task("modifyFile_BD", ["copyPlatformFile_BD"], function() {
+gulp.task("modifyFile_BD", packfiletask, function() {
 	// 如果不是百度小游戏
 	if (platform !== "bdgame") {
 		return;

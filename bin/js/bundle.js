@@ -370,7 +370,7 @@
 	                }
 	                else {
 	                    LogicManager.game_ui.ShowTowerName(this.score);
-	                    Laya.timer.once(6000, this, () => {
+	                    Laya.timer.once(5000, this, () => {
 	                        Laya.stage.on(Event.MOUSE_DOWN, this, this.OnGameOver);
 	                    });
 	                }
@@ -577,6 +577,8 @@
 	        super();
 	        this.allLables = new Array();
 	        this.bestScore = 0;
+	        this.gID = "";
+	        this.lblRanks = new Array();
 	        LogicManager.game_ui = this;
 	        this.box_combo.visible = false;
 	        this.box_tower.visible = false;
@@ -593,12 +595,32 @@
 	        this.allLables.forEach(element => {
 	            element.text = "";
 	        });
+	        this.lblRanks.push(this.lblRank_1);
+	        this.lblRanks.push(this.lblRank_2);
+	        this.lblRanks.push(this.lblRank_3);
+	        this.lblRanks.push(this.lblRank_4);
+	        this.lblRanks.push(this.lblRank_5);
+	        this.lblRanks.push(this.lblRank_6);
+	        this.lblRanks.push(this.lblRank_7);
+	        this.lblRanks.push(this.lblRank_8);
+	        this.lblRanks.push(this.lblRank_9);
+	        this.lblRanks.push(this.lblRank_10);
 	        this.btn_start.on(Event$1.MOUSE_DOWN, this, this.OnStart);
+	        this.btn_more.on(Event$1.MOUSE_DOWN, this, this.onMore);
+	        this.btn_rank.on(Event$1.MOUSE_DOWN, this, this.onRank);
+	        this.btn_rank_return.on(Event$1.MOUSE_DOWN, this, this.onCloseRank);
+	        this.gID = this.cans();
 	        this.OnRestart();
 	    }
 	    OnRestart() {
 	        this.bestScore = GameUI.getLocalStorage("bestScore", 0);
 	        this.lblBestScore.text = "" + this.bestScore;
+	        this.textGID.text = "ID-" + this.gID;
+	        if (this.bestScore > 0) {
+	            this.netPushScore(this.bestScore);
+	        }
+	        this.boxRank.visible = false;
+	        this.btn_rank_return.visible = false;
 	    }
 	    OnStart(e) {
 	        e.stopPropagation();
@@ -606,6 +628,37 @@
 	        this.lable_score.visible = true;
 	        this.box_tower.visible = false;
 	        LogicManager.getInstance().Init();
+	    }
+	    onMore(e) {
+	        e.stopPropagation();
+	        window.location.href = 'http://www.doudoubird.com/ddn/newGame.html?from=groupmessage';
+	    }
+	    onRank(e) {
+	        e.stopPropagation();
+	        this.boxRank.visible = true;
+	        this.btn_rank_return.visible = true;
+	        this.httpGet("http://www.ask4kid.com:9001/get_rank?canvas_id=" + this.gID + "&game=ddt", (res) => {
+	            if (res && res.status === 0) {
+	                if (res.info) {
+	                    for (let index = 0; index < res.info.length; index++) {
+	                        const element = res.info[index];
+	                        if (element.canvas_id === this.gID) {
+	                            this.lblRanks[index].text = "" + (index + 1) + "-" + element.canvas_id + ":(我)     " + element.score;
+	                            this.lblRanks[index].color = "#ff0000";
+	                        }
+	                        else {
+	                            this.lblRanks[index].text = "" + (index + 1) + "-" + element.canvas_id + ":         " + element.score;
+	                            this.lblRanks[index].color = "#1aa000";
+	                        }
+	                    }
+	                }
+	            }
+	        });
+	    }
+	    onCloseRank(e) {
+	        e.stopPropagation();
+	        this.boxRank.visible = false;
+	        this.btn_rank_return.visible = false;
 	    }
 	    SetCombo(num) {
 	        this.box_combo.visible = true;
@@ -694,6 +747,7 @@
 	        if (score > this.bestScore) {
 	            this.bestScore = score;
 	            GameUI.setLocalStorage("bestScore", score);
+	            this.netPushScore(this.bestScore);
 	        }
 	        for (let i = 0; i < tower.length; ++i) {
 	            this.allLables[i].text = tower[i];
@@ -704,7 +758,8 @@
 	        var num = def;
 	        var temp1 = Laya.LocalStorage.getItem(key);
 	        if (temp1) {
-	            if (isNaN(temp1)) {
+	            var temp2 = Number(temp1);
+	            if (isNaN(temp2)) {
 	                num = def;
 	                Laya.LocalStorage.setItem(key, num);
 	            }
@@ -720,6 +775,52 @@
 	    }
 	    static setLocalStorage(key, num) {
 	        Laya.LocalStorage.setItem(key, num);
+	    }
+	    bin2hex(str) {
+	        var result = "";
+	        for (let i = 0; i < str.length; i++) {
+	            result += this.int16_to_hex(str.charCodeAt(i));
+	        }
+	        return result;
+	    }
+	    int16_to_hex(i) {
+	        var result = i.toString(16);
+	        var j = 0;
+	        while (j + result.length < 4) {
+	            result = "0" + result;
+	            j++;
+	        }
+	        return result;
+	    }
+	    cans() {
+	        var canvas = document.createElement('canvas');
+	        var ctx = canvas.getContext('2d');
+	        var txt = 'www.flashflora.com';
+	        ctx.textBaseline = "top";
+	        ctx.font = "14px 'Arial'";
+	        ctx.fillStyle = "#f60";
+	        ctx.fillRect(125, 1, 62, 20);
+	        ctx.fillStyle = "#069";
+	        ctx.fillText(txt, 2, 15);
+	        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+	        ctx.fillText(txt, 4, 17);
+	        var b64 = canvas.toDataURL().replace("data:image/png;base64,", "");
+	        var bin = atob(b64);
+	        var crc = this.bin2hex(bin.slice(-16, -12));
+	        return crc;
+	    }
+	    httpGet(url, callback) {
+	        let xhr = new Laya.HttpRequest();
+	        xhr.once(Event$1.COMPLETE, this, () => {
+	            callback(xhr.data);
+	        });
+	        xhr.http.withCredentials = false;
+	        xhr.http.timeout = 8000;
+	        xhr.send(url, "", "get", "json", ["Content-Type", "application/json", 'Access-Control-Allow-Origin', '*', 'Access-Control-Allow-Methods', 'GET, POST', 'Access-Control-Allow-Headers', 'x-requested-with,content-type,authorization']);
+	    }
+	    netPushScore(score) {
+	        this.httpGet("http://www.ask4kid.com:9001/update_rank_asc?canvas_id=" + this.gID + "&game=ddt&score=" + score, (res) => {
+	        });
 	    }
 	}
 
@@ -746,7 +847,6 @@
 
 	class Main {
 	    constructor() {
-	        console.log("===1");
 	        let _config = new Config3D();
 	        _config.isAntialias = true;
 	        _config.isAlpha = false;

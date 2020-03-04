@@ -385,7 +385,7 @@ export default class LogicManager{
                     LogicManager.game_ui.box_continue.visible = true;
                 }else{
                     LogicManager.game_ui.ShowTowerName(this.score);
-                    Laya.timer.once(6000,this,()=>{
+                    Laya.timer.once(5000,this,()=>{
                         Laya.stage.on(Event.MOUSE_DOWN,this,this.OnGameOver);
                     });
                    

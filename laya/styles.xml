@@ -1,4 +1,5 @@
 <res>
    <item name="bg" type="" compress="0" pack="2" quality="80" props="" picType="0" scale="0"/>
    <item name="mp3" type="" compress="0" pack="2" quality="80" props="" picType="0" scale="0"/>
+   <item name="comp/img_rank.png" type="Image" compress="0" pack="0" quality="80" props="sizeGrid=49,56,52,64" picType="0" scale="0"/>
 </res>
